@@ -1267,6 +1267,22 @@ h3 {
   border-top: 1px solid var(--rose-soft);
 }
 
+.article-inline-figure {
+  margin: 34px 0;
+}
+
+.article-inline-figure img {
+  width: 100%;
+  background: var(--paper-deep);
+}
+
+.article-inline-figure figcaption {
+  padding-top: 10px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
 .article-sidebar {
   position: sticky;
   top: 122px;
