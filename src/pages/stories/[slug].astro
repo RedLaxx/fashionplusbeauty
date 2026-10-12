@@ -18,7 +18,7 @@ const category = categories[data.category];
 const allArticles = (await getCollection('articles', isPublished)).sort(byNewest);
 const related = allArticles.filter((item) => item.id !== article.id).slice(0, 3);
 const canonicalPath = articleUrl(article);
-const siteUrl = (import.meta.env.PUBLIC_SITE_URL || 'https://fashionplusbeauty.com').replace(/\/$/, '');
+const siteUrl = (import.meta.env.PUBLIC_SITE_URL || 'https://fashionplusbeauty.pages.dev').replace(/\/$/, '');
 const canonicalUrl = new URL(canonicalPath, `${siteUrl}/`).toString();
 const pinMedia = imageUrl(data.pinImage || data.heroImage);
 const pinHref = new URL('https://www.pinterest.com/pin/create/button/');

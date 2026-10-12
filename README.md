@@ -42,7 +42,7 @@ Recommended: use GitHub as the source repository and Cloudflare Pages as the sta
 - Production branch: the branch you use for production
 - Node version: **22.12 or newer** (or set the Cloudflare `NODE_VERSION` build variable to `22`).
 
-Set `PUBLIC_SITE_URL` in the Cloudflare Pages build environment to the final canonical HTTPS domain. The current default, `https://fashionplusbeauty.com`, is a working assumption and must be changed if the final domain is different. The sitemap and canonical metadata use this value.
+Set `PUBLIC_SITE_URL` in the Cloudflare Pages build environment to the final canonical HTTPS domain. The current canonical domain is `https://fashionplusbeauty.pages.dev`. The sitemap, robots file and canonical metadata use this value.
 
 For local settings, copy `.env.example` to `.env` and edit the values. Never commit credentials or private tokens.
 

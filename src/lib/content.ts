@@ -25,6 +25,6 @@ export function formatDate(date: Date) {
 
 export function imageUrl(path: string) {
   if (/^https?:\/\//i.test(path)) return path;
-  const siteUrl = (import.meta.env.PUBLIC_SITE_URL || 'https://fashionplusbeauty.com').replace(/\/$/, '');
+  const siteUrl = (import.meta.env.PUBLIC_SITE_URL || 'https://fashionplusbeauty.pages.dev').replace(/\/$/, '');
   return `${siteUrl}${path.startsWith('/') ? path : `/${path}`}`;
 }

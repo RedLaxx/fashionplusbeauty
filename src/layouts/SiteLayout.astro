@@ -23,7 +23,7 @@ const {
   article,
   noindex = false,
 } = Astro.props;
-const siteUrl = (import.meta.env.PUBLIC_SITE_URL || 'https://fashionplusbeauty.com').replace(/\/$/, '');
+const siteUrl = (import.meta.env.PUBLIC_SITE_URL || 'https://fashionplusbeauty.pages.dev').replace(/\/$/, '');
 const canonical = new URL(canonicalPath || Astro.url.pathname, `${siteUrl}/`).toString();
 const imageAbsolute = /^https?:\/\//i.test(image) ? image : new URL(image.startsWith('/') ? image : `/${image}`, `${siteUrl}/`).toString();
 const siteName = 'FashionPlusBeauty';
