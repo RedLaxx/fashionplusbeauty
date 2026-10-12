@@ -5,6 +5,9 @@ node_modules/
 dist/
 .astro/
 
+# generated responsive image variants (rebuilt by `npm run images` / `npm run build`)
+public/images/generated/
+
 # local environment and secrets
 .env
 .env.*

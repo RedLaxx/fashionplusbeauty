@@ -2,6 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import SiteLayout from '@/layouts/SiteLayout.astro';
 import StoryCard from '@/components/StoryCard.astro';
+import ResponsivePicture from '@/components/ResponsivePicture.astro';
 import AdSlot from '@/components/AdSlot.astro';
 import { categories } from '@/lib/categories';
 import { articleUrl, byNewest, formatDate, isPublished, imageUrl } from '@/lib/content';
@@ -56,7 +57,15 @@ const description = data.seoDescription || data.description;
   </header>
 
   <figure class="article-cover">
-    <img src={data.heroImage} alt={data.heroAlt} width="1440" height="1000" fetchpriority="high" decoding="async" />
+    <ResponsivePicture
+      src={data.heroImage}
+      alt={data.heroAlt}
+      width="1440"
+      height="1000"
+      loading="eager"
+      fetchpriority="high"
+      sizes="(max-width: 800px) calc(100vw - 40px), 1030px"
+    />
     <figcaption>Image: FashionPlusBeauty editorial</figcaption>
   </figure>
 
