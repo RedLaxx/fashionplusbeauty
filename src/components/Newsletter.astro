@@ -1,0 +1,29 @@
+---
+interface Props {
+  id: string;
+  compact?: boolean;
+}
+const { id, compact = false } = Astro.props;
+---
+<form class:list={["newsletter-form", compact && "newsletter-form-compact"]} data-newsletter-form>
+  <label class="visually-hidden" for={id}>Email address</label>
+  <div class="newsletter-form-row">
+    <input id={id} name="email" type="email" placeholder="Your email address" autocomplete="email" required />
+    <button type="submit" aria-label="Join the newsletter">Join us <span aria-hidden="true">→</span></button>
+  </div>
+  <p class="newsletter-note" data-newsletter-status aria-live="polite">By signing up, you agree to our <a href="/privacy/">privacy policy</a>. Connect an email platform before collecting subscribers.</p>
+</form>
+<script>
+  document.querySelectorAll<HTMLFormElement>('[data-newsletter-form]').forEach((form) => {
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      if (!form.reportValidity()) return;
+      const status = form.querySelector<HTMLElement>('[data-newsletter-status]');
+      if (status) {
+        status.textContent = 'Thanks for your interest! The signup design is ready—connect your email platform to start collecting subscribers.';
+        status.classList.add('newsletter-status-success');
+      }
+      form.reset();
+    });
+  });
+</script>

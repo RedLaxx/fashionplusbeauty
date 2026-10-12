@@ -1,0 +1,34 @@
+---
+type Placement = 'home' | 'article' | 'footer';
+interface Props { placement?: Placement; label?: string; }
+const { placement = 'article', label = 'Advertisement' } = Astro.props;
+const client = import.meta.env.PUBLIC_ADSENSE_CLIENT_ID;
+const slots: Record<Placement, string | undefined> = {
+  home: import.meta.env.PUBLIC_ADSENSE_SLOT_HOME,
+  article: import.meta.env.PUBLIC_ADSENSE_SLOT_ARTICLE,
+  footer: import.meta.env.PUBLIC_ADSENSE_SLOT_FOOTER,
+};
+const slotId = slots[placement];
+const configured = Boolean(client && slotId);
+const showPlaceholder = import.meta.env.DEV && !configured;
+---
+{(configured || showPlaceholder) && (
+  <aside class="ad-slot page-shell" aria-label={label}>
+    <span class="ad-slot-label">{label}</span>
+    {configured ? (
+      <>
+        <ins
+          class="adsbygoogle ad-slot-unit"
+          style="display:block"
+          data-ad-client={client}
+          data-ad-slot={slotId}
+          data-ad-format="auto"
+          data-full-width-responsive="true"
+        ></ins>
+        <script is:inline>(window.adsbygoogle = window.adsbygoogle || []).push({});</script>
+      </>
+    ) : (
+      <div class="ad-slot-placeholder"><span aria-hidden="true">✳</span> Thoughtful partnerships, coming soon.</div>
+    )}
+  </aside>
+)}

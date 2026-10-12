@@ -1,0 +1,8 @@
+import type { APIRoute } from 'astro';
+
+export const GET: APIRoute = () => {
+  const siteUrl = (import.meta.env.PUBLIC_SITE_URL || 'https://fashionplusbeauty.pages.dev').replace(/\/$/, '');
+  return new Response(`User-agent: *\nAllow: /\n\nSitemap: ${siteUrl}/sitemap-index.xml\n`, {
+    headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+  });
+};

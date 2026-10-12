@@ -1,0 +1,41 @@
+---
+import Newsletter from '@/components/Newsletter.astro';
+---
+<footer class="site-footer">
+  <div class="footer-top page-shell">
+    <div class="footer-brand-block">
+      <a class="wordmark footer-wordmark" href="/" aria-label="FashionPlusBeauty home">
+        <span class="wordmark-main">FASHION<span class="wordmark-plus">+</span>BEAUTY</span>
+        <span class="wordmark-tagline">FOR EVERY SIDE OF YOUR STYLE</span>
+      </a>
+      <p>Style, beauty and all the good in between. A fresh little corner of the internet for feeling more like you.</p>
+      <a class="footer-pinterest-link" href="/search/" aria-label="Find an idea to save on Pinterest">Find an idea to save <span aria-hidden="true">↗</span></a>
+    </div>
+    <div class="footer-link-group">
+      <p class="footer-label">Explore</p>
+      <a href="/category/fashion/">Fashion</a>
+      <a href="/category/beauty/">Beauty</a>
+      <a href="/category/lifestyle/">Living</a>
+      <a href="/category/shopping/">The edit</a>
+    </div>
+    <div class="footer-link-group">
+      <p class="footer-label">The details</p>
+      <a href="/about/">About us</a>
+      <a href="/contact/">Contact</a>
+      <a href="/partner/">Partner with us</a>
+      <a href="/affiliate-disclosure/">Affiliate disclosure</a>
+      <a href="/privacy/">Privacy</a>
+      <a href="/terms/">Terms</a>
+    </div>
+    <div class="footer-newsletter" id="newsletter">
+      <p class="footer-label">A note for your inbox</p>
+      <h2>A little lovely, delivered.</h2>
+      <p>Fresh stories, good finds and beauty notes—never the noise.</p>
+      <Newsletter id="footer-newsletter" compact={true} />
+    </div>
+  </div>
+  <div class="footer-bottom page-shell">
+    <p>© {new Date().getFullYear()} FashionPlusBeauty. All the good things, thoughtfully edited.</p>
+    <a href="#main-content">Back to the top ↑</a>
+  </div>
+</footer>
