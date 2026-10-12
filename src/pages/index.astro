@@ -1,0 +1,139 @@
+---
+import { getCollection } from 'astro:content';
+import SiteLayout from '@/layouts/SiteLayout.astro';
+import StoryCard from '@/components/StoryCard.astro';
+import AdSlot from '@/components/AdSlot.astro';
+import Newsletter from '@/components/Newsletter.astro';
+import { categories } from '@/lib/categories';
+import { byNewest, isPublished } from '@/lib/content';
+
+const allStories = (await getCollection('articles', isPublished)).sort(byNewest);
+const featured = allStories.find((story) => story.data.featured) ?? allStories[0];
+const latestStories = allStories.filter((story) => story.id !== featured?.id).slice(0, 3);
+const beautyStory = allStories.find((story) => story.data.category === 'beauty');
+---
+<SiteLayout
+  title="FashionPlusBeauty — Your everyday edit for living beautifully"
+  description="Your daily dose of wearable inspiration, clever beauty notes and feel-good living. Explore the FashionPlusBeauty edit, made for every side of your style."
+  canonicalPath="/"
+  image="/images/hero-editorial.jpg"
+  imageAlt="Fashion editorial portrait in a cherry-red blouse"
+>
+  <section class="home-hero" aria-labelledby="home-title">
+    <div class="home-hero-copy">
+      <p class="home-hero-kicker">Your new favorite corner</p>
+      <h1 id="home-title">A little more style. A lot more <em>you.</em></h1>
+      <p class="home-hero-description">Fashion, beauty and all the good in between—fresh ideas for feeling like your most confident self, every day.</p>
+      <div class="home-hero-actions">
+        <a class="button" href={featured ? `/stories/${featured.id}/` : '/category/fashion/'}>Read the cover story <span aria-hidden="true">→</span></a>
+        <a class="text-link" href="/category/fashion/">Explore the edit <span aria-hidden="true">↗</span></a>
+      </div>
+      <p class="home-hero-note"><span aria-hidden="true">✳</span><span>Thoughtful reads. Wearable ideas. Your kind of beautiful.</span></p>
+    </div>
+    <div class="home-hero-image-wrap">
+      <img
+        class="home-hero-image"
+        src="/images/hero-editorial.jpg"
+        alt="A confident woman in a sculptural cherry-red blouse and gold earrings"
+        width="1536"
+        height="1024"
+        fetchpriority="high"
+        decoding="async"
+      />
+      {featured && (
+        <a class="cover-story-badge" href={`/stories/${featured.id}/`}>
+          <small>On the cover · {featured.data.readTime} min read</small>
+          <strong>{featured.data.title}</strong>
+          <span>Read the story ↗</span>
+        </a>
+      )}
+    </div>
+  </section>
+
+  <div class="home-intro-strip" aria-label="What you will find here">
+    <div class="home-intro-item"><span aria-hidden="true">✳</span> Style that feels like you</div>
+    <div class="home-intro-item"><span aria-hidden="true">✳</span> Beauty without the fuss</div>
+    <div class="home-intro-item"><span aria-hidden="true">✳</span> Little things worth saving</div>
+  </div>
+
+  <AdSlot placement="home" />
+
+  <section class="content-section page-shell" aria-labelledby="latest-heading">
+    <div class="section-heading">
+      <div>
+        <p class="section-kicker">Fresh from the edit</p>
+        <h2 id="latest-heading">The latest notes</h2>
+      </div>
+      <a class="text-link" href="/search/">Find your next read <span aria-hidden="true">→</span></a>
+    </div>
+    <div class="story-grid">
+      {latestStories.map((story) => <StoryCard article={story} />)}
+    </div>
+  </section>
+
+  <section class="content-section page-shell" aria-labelledby="discover-heading">
+    <div class="section-heading">
+      <div>
+        <p class="section-kicker">A good place to start</p>
+        <h2 id="discover-heading">What are you in the mood for?</h2>
+      </div>
+      <p>From getting dressed to winding down, find a little inspiration for the day you have.</p>
+    </div>
+    <div class="category-tiles">
+      <a class="category-tile" href="/category/fashion/">
+        <small>01 · {categories.fashion.label}</small>
+        <strong>Find your feel-good fit.</strong>
+        <span class="tile-arrow" aria-hidden="true">↗</span>
+      </a>
+      <a class="category-tile" href="/category/beauty/">
+        <small>02 · {categories.beauty.label}</small>
+        <strong>Make room for your glow.</strong>
+        <span class="tile-arrow" aria-hidden="true">↗</span>
+      </a>
+      <a class="category-tile" href="/category/lifestyle/">
+        <small>03 · {categories.lifestyle.label}</small>
+        <strong>Give the everyday a little love.</strong>
+        <span class="tile-arrow" aria-hidden="true">↗</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="home-promo page-shell" aria-labelledby="home-promo-title">
+    <div class="home-promo-art">
+      <img
+        src={beautyStory?.data.heroImage ?? '/images/beauty-editorial.jpg'}
+        alt={beautyStory?.data.heroAlt ?? 'A dewy beauty editorial portrait with a skincare serum'}
+        width="900"
+        height="1125"
+        loading="lazy"
+        decoding="async"
+      />
+    </div>
+    <div class="home-promo-copy">
+      <p class="eyebrow">The considered edit</p>
+      <h2 id="home-promo-title">Good finds. No guesswork.</h2>
+      <p>Our shopping notes bring together thoughtful picks, useful details and fresh inspiration—so you can spend less time scrolling and more time enjoying the good stuff.</p>
+      <a class="button button-light" href="/category/shopping/">See the shopping edit <span aria-hidden="true">→</span></a>
+    </div>
+  </section>
+
+  <section class="content-section page-shell" aria-labelledby="save-heading">
+    <div class="section-heading">
+      <div>
+        <p class="section-kicker">Pin a little inspiration</p>
+        <h2 id="save-heading">Ideas to come back to.</h2>
+      </div>
+      <p>Build a board of outfits, beauty notes and small rituals that feel like your kind of lovely.</p>
+    </div>
+    <div class="story-grid">
+      {allStories.filter((story) => story.id !== featured?.id).slice(-3).reverse().map((story) => <StoryCard article={story} showExcerpt={false} />)}
+    </div>
+  </section>
+
+  <section class="newsletter-band" aria-labelledby="home-newsletter-title">
+    <p class="eyebrow">A little lovely, delivered</p>
+    <h2 id="home-newsletter-title">Your inbox, but make it inspiring.</h2>
+    <p>Get the freshest stories, beauty notes and shopping edits in one lovely little email.</p>
+    <Newsletter id="home-newsletter" />
+  </section>
+</SiteLayout>

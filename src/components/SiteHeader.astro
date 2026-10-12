@@ -1,0 +1,54 @@
+---
+import { categories } from '@/lib/categories';
+---
+<div class="announcement-bar">
+  <span class="announcement-sparkle" aria-hidden="true">✳</span>
+  <p>THE EVERYDAY EDIT FOR LIVING BEAUTIFULLY</p>
+  <span class="announcement-sparkle" aria-hidden="true">✳</span>
+</div>
+<header class="site-header">
+  <div class="header-inner page-shell">
+    <a class="wordmark" href="/" aria-label="FashionPlusBeauty home">
+      <span class="wordmark-main">FASHION<span class="wordmark-plus">+</span>BEAUTY</span>
+      <span class="wordmark-tagline">FOR EVERY SIDE OF YOUR STYLE</span>
+    </a>
+    <button class="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="primary-navigation" data-menu-toggle>
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="primary-navigation" id="primary-navigation" aria-label="Main navigation" data-site-nav>
+      <a href="/category/fashion/">{categories.fashion.navLabel}</a>
+      <a href="/category/beauty/">{categories.beauty.navLabel}</a>
+      <a href="/category/lifestyle/">{categories.lifestyle.navLabel}</a>
+      <a href="/category/shopping/">{categories.shopping.navLabel}</a>
+      <a class="mobile-only-nav" href="/about/">About</a>
+    </nav>
+    <div class="header-actions">
+      <a class="header-search" href="/search/" aria-label="Search stories">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.7"></circle><path d="m16 16 4.2 4.2"></path></svg>
+      </a>
+      <a class="header-subscribe" href="#newsletter">The newsletter <span aria-hidden="true">↗</span></a>
+    </div>
+  </div>
+</header>
+<script>
+  const menuButton = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  const siteNav = document.querySelector<HTMLElement>('[data-site-nav]');
+
+  const closeMenu = () => {
+    menuButton?.setAttribute('aria-expanded', 'false');
+    menuButton?.setAttribute('aria-label', 'Open navigation');
+    siteNav?.classList.remove('is-open');
+  };
+
+  menuButton?.addEventListener('click', () => {
+    const isOpen = menuButton.getAttribute('aria-expanded') === 'true';
+    menuButton.setAttribute('aria-expanded', String(!isOpen));
+    menuButton.setAttribute('aria-label', isOpen ? 'Open navigation' : 'Close navigation');
+    siteNav?.classList.toggle('is-open', !isOpen);
+  });
+
+  siteNav?.querySelectorAll('a').forEach((link) => link.addEventListener('click', closeMenu));
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeMenu();
+  });
+</script>

@@ -1,0 +1,141 @@
+---
+import { getCollection } from 'astro:content';
+import SiteLayout from '@/layouts/SiteLayout.astro';
+import { categories } from '@/lib/categories';
+import { byNewest, isPublished } from '@/lib/content';
+
+const stories = (await getCollection('articles', isPublished)).sort(byNewest);
+const searchIndex = stories.map((story) => ({
+  id: story.id,
+  title: story.data.title,
+  description: story.data.description,
+  category: categories[story.data.category].label,
+  categorySlug: story.data.category,
+  image: story.data.heroImage,
+  imageAlt: story.data.heroAlt,
+  readTime: story.data.readTime,
+  date: story.data.pubDate.toISOString(),
+  href: `/stories/${story.id}/`,
+  tags: story.data.tags,
+}));
+const serializedSearchIndex = JSON.stringify(searchIndex).replace(/</g, '\\u003c');
+const query = Astro.url.searchParams.get('q') ?? '';
+---
+<SiteLayout
+  title="Search stories | FashionPlusBeauty"
+  description="Find fashion, beauty and lifestyle ideas in the FashionPlusBeauty editorial archive."
+  canonicalPath="/search/"
+  noindex={true}
+>
+  <section class="search-page-hero page-shell" aria-labelledby="search-title">
+    <p class="eyebrow">The story finder</p>
+    <h1 id="search-title">Find your next read.</h1>
+    <p>Search the FashionPlusBeauty edit for a little inspiration.</p>
+    <form class="search-form" action="/search/" method="get" role="search" data-search-form>
+      <label class="visually-hidden" for="story-search">Search stories</label>
+      <input id="story-search" type="search" name="q" placeholder="Try “capsule wardrobe” or “glowy skin”…" value={query} autocomplete="off" data-search-input />
+      <button type="submit">Search <span aria-hidden="true">→</span></button>
+    </form>
+  </section>
+  <section class="page-shell" aria-labelledby="search-results-heading">
+    <div class="section-heading">
+      <div><p class="section-kicker">A lovely place to begin</p><h2 id="search-results-heading">Latest stories</h2></div>
+      <p data-search-count aria-live="polite">{stories.length} stories in the edit</p>
+    </div>
+    <div class="search-results" data-search-results aria-live="polite"></div>
+    <div class="search-empty" data-search-empty hidden>No stories match that search just yet. Try a different word or browse the sections above.</div>
+  </section>
+  <script type="application/json" id="search-index" set:html={serializedSearchIndex} />
+</SiteLayout>
+<script>
+  type SearchStory = {
+    id: string;
+    title: string;
+    description: string;
+    category: string;
+    categorySlug: string;
+    image: string;
+    imageAlt: string;
+    readTime: number;
+    date: string;
+    href: string;
+    tags: string[];
+  };
+
+  const dataElement = document.querySelector<HTMLScriptElement>('#search-index');
+  const input = document.querySelector<HTMLInputElement>('[data-search-input]');
+  const results = document.querySelector<HTMLElement>('[data-search-results]');
+  const empty = document.querySelector<HTMLElement>('[data-search-empty]');
+  const count = document.querySelector<HTMLElement>('[data-search-count]');
+  const heading = document.querySelector<HTMLElement>('#search-results-heading');
+  const searchForm = document.querySelector<HTMLFormElement>('[data-search-form]');
+  const stories: SearchStory[] = dataElement?.textContent ? JSON.parse(dataElement.textContent) : [];
+
+  const formatDate = (date: string) => new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }).format(new Date(date));
+
+  const renderResults = () => {
+    if (!results || !input) return;
+    const query = input.value.trim().toLowerCase();
+    const matches = stories.filter((story) => {
+      const haystack = [story.title, story.description, story.category, ...story.tags].join(' ').toLowerCase();
+      return !query || haystack.includes(query);
+    });
+    results.replaceChildren();
+    matches.forEach((story) => {
+      const card = document.createElement('article');
+      card.className = 'story-card';
+      const imageLink = document.createElement('a');
+      imageLink.className = 'story-card-image-link';
+      imageLink.href = story.href;
+      imageLink.setAttribute('aria-label', `Read: ${story.title}`);
+      const image = document.createElement('img');
+      image.className = 'story-card-image';
+      image.src = story.image;
+      image.alt = story.imageAlt;
+      image.loading = 'lazy';
+      image.decoding = 'async';
+      imageLink.append(image);
+      const copy = document.createElement('div');
+      copy.className = 'story-card-copy';
+      const meta = document.createElement('div');
+      meta.className = 'story-card-meta';
+      const categoryLink = document.createElement('a');
+      categoryLink.className = 'eyebrow category-link';
+      categoryLink.href = `/category/${story.categorySlug}/`;
+      categoryLink.textContent = story.category;
+      const readTime = document.createElement('span');
+      readTime.textContent = `${story.readTime} min read`;
+      meta.append(categoryLink, readTime);
+      const title = document.createElement('h3');
+      const titleLink = document.createElement('a');
+      titleLink.href = story.href;
+      titleLink.textContent = story.title;
+      title.append(titleLink);
+      const description = document.createElement('p');
+      description.textContent = story.description;
+      const footer = document.createElement('div');
+      footer.className = 'story-card-footer';
+      const date = document.createElement('time');
+      date.dateTime = story.date;
+      date.textContent = formatDate(story.date);
+      const sparkle = document.createElement('span');
+      sparkle.setAttribute('aria-hidden', 'true');
+      sparkle.textContent = '✳';
+      footer.append(date, sparkle);
+      copy.append(meta, title, description, footer);
+      card.append(imageLink, copy);
+      results.append(card);
+    });
+    if (count) count.textContent = query ? `${matches.length} ${matches.length === 1 ? 'story' : 'stories'} found` : `${matches.length} stories in the edit`;
+    if (heading) heading.textContent = query ? `Results for “${input.value.trim()}”` : 'Latest stories';
+    if (empty) empty.hidden = matches.length !== 0;
+    results.hidden = matches.length === 0;
+  };
+
+  input?.addEventListener('input', renderResults);
+  searchForm?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    renderResults();
+  });
+  renderResults();
+</script>

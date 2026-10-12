@@ -1,0 +1,92 @@
+media:
+  input: public/images
+  output: /images
+
+content:
+  - name: articles
+    label: Articles
+    type: collection
+    path: src/content/articles
+    filename: "{primary}.md"
+    view:
+      fields: [title, category, pubDate, status]
+      sort: [pubDate, desc]
+      primary: title
+    fields:
+      - name: title
+        label: Headline
+        type: string
+        required: true
+      - name: description
+        label: Short description
+        type: text
+        required: true
+      - name: pubDate
+        label: Publish date
+        type: date
+        required: true
+      - name: updatedDate
+        label: Updated date
+        type: date
+      - name: category
+        label: Section
+        type: select
+        options:
+          values:
+            - value: fashion
+              label: Fashion
+            - value: beauty
+              label: Beauty
+            - value: lifestyle
+              label: Lifestyle
+            - value: shopping
+              label: Shopping
+        required: true
+      - name: heroImage
+        label: Featured image
+        type: image
+        required: true
+      - name: heroAlt
+        label: Image description (alt text)
+        type: string
+        required: true
+      - name: pinImage
+        label: Pinterest image (portrait recommended)
+        type: image
+      - name: author
+        label: Byline
+        type: string
+      - name: readTime
+        label: Reading time in minutes
+        type: number
+      - name: featured
+        label: Feature on homepage
+        type: boolean
+      - name: tags
+        label: Topics / SEO keywords
+        type: string
+        list: true
+      - name: seoTitle
+        label: SEO title (optional)
+        type: string
+      - name: seoDescription
+        label: SEO description (optional)
+        type: text
+      - name: status
+        label: Publishing status
+        type: select
+        options:
+          values:
+            - value: published
+              label: Published
+            - value: draft
+              label: Draft
+        required: true
+        default: published
+      - name: affiliateDisclosure
+        label: Contains affiliate links
+        type: boolean
+      - name: body
+        label: Article
+        type: rich-text
+        required: true

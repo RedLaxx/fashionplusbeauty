@@ -1,0 +1,38 @@
+---
+import type { Article } from '@/lib/content';
+import { categories } from '@/lib/categories';
+import { articleUrl, formatDate } from '@/lib/content';
+
+interface Props {
+  article: Article;
+  variant?: 'default' | 'compact';
+  showExcerpt?: boolean;
+  showCategory?: boolean;
+}
+const { article, variant = 'default', showExcerpt = true, showCategory = true } = Astro.props;
+const data = article.data;
+const category = categories[data.category];
+---
+<article class:list={["story-card", variant === 'compact' && "story-card-compact"]}>
+  <a class="story-card-image-link" href={articleUrl(article)} aria-label={`Read: ${data.title}`}>
+    <img
+      class="story-card-image"
+      src={data.heroImage}
+      alt={data.heroAlt}
+      loading="lazy"
+      decoding="async"
+      width="900"
+      height="1125"
+    />
+    <span class="story-card-image-mark" aria-hidden="true">↗</span>
+  </a>
+  <div class="story-card-copy">
+    <div class="story-card-meta">
+      {showCategory && <a class="eyebrow category-link" href={`/category/${data.category}/`}>{category.label}</a>}
+      <span>{data.readTime} min read</span>
+    </div>
+    <h3><a href={articleUrl(article)}>{data.title}</a></h3>
+    {showExcerpt && <p>{data.description}</p>}
+    <div class="story-card-footer"><time datetime={data.pubDate.toISOString()}>{formatDate(data.pubDate)}</time><span aria-hidden="true">✳</span></div>
+  </div>
+</article>

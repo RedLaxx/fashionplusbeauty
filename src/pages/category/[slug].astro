@@ -1,0 +1,55 @@
+---
+import { getCollection } from 'astro:content';
+import SiteLayout from '@/layouts/SiteLayout.astro';
+import StoryCard from '@/components/StoryCard.astro';
+import AdSlot from '@/components/AdSlot.astro';
+import { categories } from '@/lib/categories';
+import type { CategorySlug } from '@/lib/categories';
+import { byNewest, isPublished } from '@/lib/content';
+
+export async function getStaticPaths() {
+  return Object.entries(categories).map(([slug, category]) => ({
+    params: { slug },
+    props: { slug, category },
+  }));
+}
+
+const { slug, category } = Astro.props as { slug: CategorySlug; category: (typeof categories)[CategorySlug] };
+const stories = (await getCollection('articles', isPublished))
+  .filter((story) => story.data.category === slug)
+  .sort(byNewest);
+const heading = `${category.label} stories & inspiration | FashionPlusBeauty`;
+---
+<SiteLayout
+  title={heading}
+  description={category.description}
+  canonicalPath={`/category/${slug}/`}
+  image={stories[0]?.data.heroImage ?? '/images/hero-editorial.jpg'}
+  imageAlt={stories[0]?.data.heroAlt ?? 'FashionPlusBeauty editorial image'}
+>
+  <section class="category-hero" aria-labelledby="category-title">
+    <div class="category-hero-inner page-shell">
+      <p class="eyebrow">{category.eyebrow}</p>
+      <h1 id="category-title">{category.title}</h1>
+      <p>{category.description}</p>
+    </div>
+  </section>
+
+  <section class="category-grid-section content-section page-shell" aria-labelledby="category-stories-heading">
+    <div class="section-heading">
+      <div>
+        <p class="section-kicker">The good stuff, gathered</p>
+        <h2 id="category-stories-heading">{stories.length ? `The ${category.label.toLowerCase()} edit` : `More ${category.label.toLowerCase()} notes, soon`}</h2>
+      </div>
+      <a class="text-link" href="/search/">Search all stories <span aria-hidden="true">→</span></a>
+    </div>
+    {stories.length ? (
+      <div class="story-grid">
+        {stories.map((story) => <StoryCard article={story} />)}
+      </div>
+    ) : (
+      <div class="search-empty">We’re putting together the next edit. In the meantime, explore <a class="text-link" href="/category/fashion/">all of our stories <span aria-hidden="true">→</span></a>.</div>
+    )}
+  </section>
+  <AdSlot placement="footer" />
+</SiteLayout>
