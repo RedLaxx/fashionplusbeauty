@@ -2,6 +2,7 @@
 import type { Article } from '@/lib/content';
 import { categories } from '@/lib/categories';
 import { articleUrl, formatDate } from '@/lib/content';
+import ResponsivePicture from '@/components/ResponsivePicture.astro';
 
 interface Props {
   article: Article;
@@ -15,14 +16,15 @@ const category = categories[data.category];
 ---
 <article class:list={["story-card", variant === 'compact' && "story-card-compact"]}>
   <a class="story-card-image-link" href={articleUrl(article)} aria-label={`Read: ${data.title}`}>
-    <img
+    <ResponsivePicture
       class="story-card-image"
       src={data.heroImage}
       alt={data.heroAlt}
-      loading="lazy"
-      decoding="async"
       width="900"
       height="1125"
+      loading="lazy"
+      mobile
+      sizes="(max-width: 540px) 100vw, (max-width: 800px) 50vw, 400px"
     />
     <span class="story-card-image-mark" aria-hidden="true">↗</span>
   </a>

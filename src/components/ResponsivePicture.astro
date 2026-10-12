@@ -1,0 +1,73 @@
+---
+/**
+ * Renders an optimized `<picture>` for a `/images/...` path.
+ *
+ * - Full-frame WebP variants (320w → 1600w) are offered to every viewport.
+ * - `mobile` marks the image as a full-bleed media block on small screens, so
+ *   phones get the 3:2 "compact" crops from `scripts/generate-images.mjs`.
+ * - Without a generated manifest the component degrades to a plain `<img>` with
+ *   the original file, so `astro check` and clean clones keep working.
+ *
+ * The generated `<picture>` element uses `display: contents` (see global.css), so
+ * it does not affect existing layout rules that target the `<img>` itself.
+ */
+import { fallbackSrcFor, getResponsiveImage, srcSetFor } from '@/lib/responsive-images';
+
+interface Props {
+  src: string;
+  alt: string;
+  width: number | string;
+  height: number | string;
+  sizes?: string;
+  class?: string;
+  loading?: 'eager' | 'lazy';
+  decoding?: 'async' | 'sync' | 'auto';
+  fetchpriority?: 'high' | 'low' | 'auto';
+  mobile?: boolean;
+  pictureClass?: string;
+}
+
+const {
+  src,
+  alt,
+  width,
+  height,
+  sizes,
+  class: className,
+  loading = 'lazy',
+  decoding = 'async',
+  fetchpriority,
+  mobile = false,
+  pictureClass,
+} = Astro.props;
+
+const entry = getResponsiveImage(src);
+const mainSrcset = entry ? srcSetFor(entry.main.variants) : undefined;
+const mobileSrcset =
+  mobile && entry && entry.mobile.variants.length > 1 ? srcSetFor(entry.mobile.variants) : undefined;
+const fallbackSrc = entry ? fallbackSrcFor(entry) : src;
+---
+<picture class:list={['responsive-picture', pictureClass]}>
+  {mobileSrcset && entry && (
+    <source
+      srcset={mobileSrcset}
+      media={entry.mobile.media}
+      sizes="100vw"
+      width={entry.mobile.width}
+      height={entry.mobile.height}
+      type="image/webp"
+    />
+  )}
+  <img
+    class={className}
+    src={fallbackSrc}
+    srcset={mainSrcset}
+    sizes={mainSrcset ? sizes : undefined}
+    alt={alt}
+    width={width}
+    height={height}
+    loading={loading}
+    decoding={decoding}
+    fetchpriority={fetchpriority}
+  />
+</picture>

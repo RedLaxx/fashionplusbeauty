@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import SiteLayout from '@/layouts/SiteLayout.astro';
 import StoryCard from '@/components/StoryCard.astro';
+import ResponsivePicture from '@/components/ResponsivePicture.astro';
 import AdSlot from '@/components/AdSlot.astro';
 import Newsletter from '@/components/Newsletter.astro';
 import { categories } from '@/lib/categories';
@@ -31,14 +32,15 @@ const beautyStory = allStories.find((story) => story.data.category === 'beauty')
       <p class="home-hero-note"><span aria-hidden="true">✳</span><span>Thoughtful reads. Wearable ideas. Your kind of beautiful.</span></p>
     </div>
     <div class="home-hero-image-wrap">
-      <img
+      <ResponsivePicture
         class="home-hero-image"
         src="/images/hero-editorial.jpg"
         alt="A confident woman in a sculptural cherry-red blouse and gold earrings"
-        width="1536"
-        height="1024"
+        width={1536}
+        height={1024}
+        sizes="(max-width: 800px) 100vw, 52vw"
+        loading="eager"
         fetchpriority="high"
-        decoding="async"
       />
       {featured && (
         <a class="cover-story-badge" href={`/stories/${featured.id}/`}>
@@ -100,13 +102,14 @@ const beautyStory = allStories.find((story) => story.data.category === 'beauty')
 
   <section class="home-promo page-shell" aria-labelledby="home-promo-title">
     <div class="home-promo-art">
-      <img
+      <ResponsivePicture
         src={beautyStory?.data.heroImage ?? '/images/beauty-editorial.jpg'}
         alt={beautyStory?.data.heroAlt ?? 'A dewy beauty editorial portrait with a skincare serum'}
         width="900"
         height="1125"
         loading="lazy"
-        decoding="async"
+        sizes="(max-width: 800px) 100vw, 46vw"
+        mobile
       />
     </div>
     <div class="home-promo-copy">

@@ -8,9 +8,13 @@
   },
   "scripts": {
     "dev": "astro dev --host 0.0.0.0",
+    "predev": "npm run images",
     "build": "astro build",
+    "prebuild": "npm run images",
     "preview": "astro preview --host 0.0.0.0",
-    "check": "astro check"
+    "check": "astro check",
+    "images": "node scripts/generate-images.mjs",
+    "images:force": "node scripts/generate-images.mjs --force"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",
@@ -18,6 +22,8 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
+    "@types/node": "^24.19.2",
+    "sharp": "^0.35.5",
     "typescript": "^5.9.3"
   }
 }

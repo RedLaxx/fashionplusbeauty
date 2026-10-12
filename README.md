@@ -21,6 +21,23 @@ npm run build
 npm run preview
 ```
 
+## Responsive images
+
+Editorial photos live in `public/images/`. Before every dev run and every build, `scripts/generate-images.mjs` encodes WebP variants with [sharp](https://sharp.pixelplumbing.com/) and writes a manifest:
+
+- full-frame variants from 320px to 1600px wide for phones, tablets and desktops;
+- 3:2 "compact" crops for phones (max-width 540px) that exactly match the mobile card frames, so no portrait pixels are wasted behind a short card;
+- `public/images/generated/manifest.json`, read at build time by `src/lib/responsive-images.ts` and rendered through `src/components/ResponsivePicture.astro`.
+
+Variant filenames include a short fingerprint of the source file, so replacing a photo keeps the one-year `immutable` cache header in `public/_headers` safe.
+
+```sh
+npm run images         # generate variants (incremental – only changed sources are re-encoded)
+npm run images:force   # re-encode everything
+```
+
+`public/images/generated/` is git-ignored: it is a build artifact that every build recreates. When sharp is unavailable the build logs a warning and falls back to the original images; on CI it fails instead, so a deployed build always includes the optimized set.
+
 ## Content editing with Pages CMS
 
 The site is static-first and stores articles as Markdown in `src/content/articles/`. The root `.pages.yml` is the Pages CMS configuration.
@@ -69,8 +86,11 @@ The build contains prepared AdSense placements, a partner page, article-level af
 ```text
 src/content/articles/       Markdown stories and frontmatter
 src/pages/                  Home, category archives, articles and information pages
-src/components/             Header, footer, story cards, newsletter and ad slots
+src/components/             Header, footer, story cards, responsive pictures, newsletter and ad slots
 src/styles/global.css       Responsive design system and layout styles
+src/lib/responsive-images.ts  Reads the generated image manifest at build time
+scripts/generate-images.mjs   Sharp-based WebP variant generator (predev/prebuild)
 .pages.yml                  Pages CMS collection and media configuration
 public/images/              Original editorial image assets
+public/images/generated/    Generated WebP variants and manifest (git-ignored build artifact)
 ```
