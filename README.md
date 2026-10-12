@@ -6,7 +6,7 @@ An editorial fashion, beauty and lifestyle blog built as a fast, static Astro si
 
 ## Run locally
 
-Requires Node.js 22 or newer.
+Requires Node.js 22.12 or newer (`.nvmrc` pins the Node 22 line).
 
 ```sh
 npm install
@@ -40,7 +40,7 @@ Recommended: use GitHub as the source repository and Cloudflare Pages as the sta
 - Build command: `npm run build`
 - Build output directory: `dist`
 - Production branch: the branch you use for production
-- Node version: **22**
+- Node version: **22.12 or newer** (or set the Cloudflare `NODE_VERSION` build variable to `22`).
 
 Set `PUBLIC_SITE_URL` in the Cloudflare Pages build environment to the final canonical HTTPS domain. The current default, `https://fashionplusbeauty.com`, is a working assumption and must be changed if the final domain is different. The sitemap and canonical metadata use this value.
 
