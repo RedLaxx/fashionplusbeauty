@@ -3,21 +3,38 @@ import { getCollection } from 'astro:content';
 import SiteLayout from '@/layouts/SiteLayout.astro';
 import { categories } from '@/lib/categories';
 import { byNewest, isPublished } from '@/lib/content';
+import { fallbackSrcFor, getResponsiveImage, srcSetFor } from '@/lib/responsive-images';
+
+const CARD_IMAGE_SIZES = '(max-width: 540px) 100vw, (max-width: 800px) 50vw, 400px';
 
 const stories = (await getCollection('articles', isPublished)).sort(byNewest);
-const searchIndex = stories.map((story) => ({
-  id: story.id,
-  title: story.data.title,
-  description: story.data.description,
-  category: categories[story.data.category].label,
-  categorySlug: story.data.category,
-  image: story.data.heroImage,
-  imageAlt: story.data.heroAlt,
-  readTime: story.data.readTime,
-  date: story.data.pubDate.toISOString(),
-  href: `/stories/${story.id}/`,
-  tags: story.data.tags,
-}));
+const searchIndex = stories.map((story) => {
+  const entry = getResponsiveImage(story.data.heroImage);
+  const imageSrcset = entry ? srcSetFor(entry.main.variants) : undefined;
+  const imageMobileSrcset =
+    entry && entry.mobile.variants.length > 1 ? srcSetFor(entry.mobile.variants) : undefined;
+  return {
+    id: story.id,
+    title: story.data.title,
+    description: story.data.description,
+    category: categories[story.data.category].label,
+    categorySlug: story.data.category,
+    image: entry ? fallbackSrcFor(entry) : story.data.heroImage,
+    imageAlt: story.data.heroAlt,
+    imageSrcset,
+    imageSizes: imageSrcset ? CARD_IMAGE_SIZES : undefined,
+    imageWidth: 900,
+    imageHeight: 1125,
+    imageMobileSrcset,
+    imageMobileMedia: imageMobileSrcset && entry ? entry.mobile.media : undefined,
+    imageMobileWidth: imageMobileSrcset && entry ? entry.mobile.width : undefined,
+    imageMobileHeight: imageMobileSrcset && entry ? entry.mobile.height : undefined,
+    readTime: story.data.readTime,
+    date: story.data.pubDate.toISOString(),
+    href: `/stories/${story.id}/`,
+    tags: story.data.tags,
+  };
+});
 const serializedSearchIndex = JSON.stringify(searchIndex).replace(/</g, '\\u003c');
 const query = Astro.url.searchParams.get('q') ?? '';
 ---
@@ -56,6 +73,14 @@ const query = Astro.url.searchParams.get('q') ?? '';
     categorySlug: string;
     image: string;
     imageAlt: string;
+    imageSrcset?: string;
+    imageSizes?: string;
+    imageWidth: number;
+    imageHeight: number;
+    imageMobileSrcset?: string;
+    imageMobileMedia?: string;
+    imageMobileWidth?: number;
+    imageMobileHeight?: number;
     readTime: number;
     date: string;
     href: string;
@@ -88,13 +113,36 @@ const query = Astro.url.searchParams.get('q') ?? '';
       imageLink.className = 'story-card-image-link';
       imageLink.href = story.href;
       imageLink.setAttribute('aria-label', `Read: ${story.title}`);
+      const picture = document.createElement('picture');
+      picture.className = 'responsive-picture';
+      if (story.imageMobileSrcset) {
+        const source = document.createElement('source');
+        source.srcset = story.imageMobileSrcset;
+        if (story.imageMobileMedia) source.media = story.imageMobileMedia;
+        source.sizes = '100vw';
+        if (story.imageMobileWidth) source.width = story.imageMobileWidth;
+        if (story.imageMobileHeight) source.height = story.imageMobileHeight;
+        source.type = 'image/webp';
+        picture.append(source);
+      }
       const image = document.createElement('img');
       image.className = 'story-card-image';
       image.src = story.image;
+      if (story.imageSrcset) {
+        image.srcset = story.imageSrcset;
+        if (story.imageSizes) image.sizes = story.imageSizes;
+      }
       image.alt = story.imageAlt;
+      image.width = story.imageWidth;
+      image.height = story.imageHeight;
       image.loading = 'lazy';
       image.decoding = 'async';
-      imageLink.append(image);
+      picture.append(image);
+      const imageMark = document.createElement('span');
+      imageMark.className = 'story-card-image-mark';
+      imageMark.setAttribute('aria-hidden', 'true');
+      imageMark.textContent = '↗';
+      imageLink.append(picture, imageMark);
       const copy = document.createElement('div');
       copy.className = 'story-card-copy';
       const meta = document.createElement('div');

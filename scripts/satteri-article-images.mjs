@@ -19,7 +19,11 @@
  * The `<figure>` wrapper — styled by `.article-inline-figure` in global.css — is only
  * added when the image stands alone in its own paragraph, which is how article
  * bodies are written. An image used mid-sentence is simply swapped for the
- * `<picture>`, so it stays inline.
+ * `<picture>`, so it stays inline. Images authored directly in raw HTML (such as
+ * `<figure class="article-inline-figure">…<figcaption>…</figcaption></figure>` or
+ * HTML written by the Pages CMS rich-text editor) have their `<img>` tags upgraded
+ * in place, leaving surrounding `<figure>`, `<figcaption>` and any extra attributes
+ * untouched.
  *
  * Two deliberate differences from the component:
  *   - No 3:2 "compact" mobile `<source>`: editorial body images such as the
@@ -114,6 +118,65 @@ function holdsOnlyImage(paragraph) {
   return meaningful.length === 1 && isElement(meaningful[0], 'img');
 }
 
+const IMG_TAG_RE = /<img\b((?:[^>"']|"[^"]*"|'[^']*')*)\/?>/gi;
+const ATTR_RE = /([a-zA-Z_:][\w:.-]*)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+)))?/g;
+const MANAGED_ATTRS = new Set(['src', 'srcset', 'sizes', 'width', 'height', 'alt', 'loading', 'decoding']);
+
+function escapeAttr(value) {
+  return String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+}
+
+/** Upgrades `<img>` tags inside a raw HTML block in place, leaving `<figure>` and `<figcaption>` untouched. */
+function rewriteRawImages(html, images) {
+  if (typeof html !== 'string' || !/<img\b/i.test(html) || /<picture\b/i.test(html)) {
+    return undefined;
+  }
+
+  let changed = false;
+  const rewritten = html.replace(IMG_TAG_RE, (fullTag, attrText) => {
+    const attrs = new Map();
+    const extras = [];
+
+    for (const match of attrText.matchAll(ATTR_RE)) {
+      const rawName = match[1];
+      const name = rawName.toLowerCase();
+      const value = match[2] ?? match[3] ?? match[4] ?? '';
+      const hasValue = match[2] !== undefined || match[3] !== undefined || match[4] !== undefined;
+      attrs.set(name, hasValue ? value : true);
+      if (!MANAGED_ATTRS.has(name)) {
+        extras.push(hasValue ? `${rawName}="${escapeAttr(value)}"` : rawName);
+      }
+    }
+
+    if (attrs.has('srcset')) return fullTag;
+    const src = attrs.get('src');
+    if (typeof src !== 'string' || !src || isRemote(src)) return fullTag;
+
+    const entry = images[normalizePath(src)];
+    const variants = entry?.main?.variants ?? [];
+    if (variants.length === 0) return fullTag;
+
+    const narrowest = variants[0];
+    const widest = variants[variants.length - 1];
+    const srcset = variants.map((variant) => `${variant.path} ${variant.width}w`).join(', ');
+    const authoredSizes = attrs.get('sizes');
+    const sizes = typeof authoredSizes === 'string' && authoredSizes ? authoredSizes : DEFAULT_SIZES;
+    const width = entry.source?.width ?? widest.width;
+    const height = entry.source?.height ?? widest.height;
+    const alt = typeof attrs.get('alt') === 'string' ? attrs.get('alt') : '';
+    const authoredLoading = attrs.get('loading');
+    const loading = typeof authoredLoading === 'string' && authoredLoading ? authoredLoading : 'lazy';
+    const authoredDecoding = attrs.get('decoding');
+    const decoding = typeof authoredDecoding === 'string' && authoredDecoding ? authoredDecoding : 'async';
+    const extraAttrText = extras.length > 0 ? ` ${extras.join(' ')}` : '';
+
+    changed = true;
+    return `<picture class="responsive-picture"><img src="${escapeAttr(narrowest.path)}" srcset="${escapeAttr(srcset)}" sizes="${escapeAttr(sizes)}" width="${width}" height="${height}" alt="${escapeAttr(alt)}" loading="${escapeAttr(loading)}" decoding="${escapeAttr(decoding)}"${extraAttrText}></picture>`;
+  });
+
+  return changed ? rewritten : undefined;
+}
+
 const articleImages = {
   name: 'article-responsive-images',
   element: {
@@ -135,6 +198,11 @@ const articleImages = {
 
       return picture;
     },
+  },
+  raw(node) {
+    const rewritten = rewriteRawImages(node.value, loadManifest());
+    if (!rewritten) return;
+    return { type: 'raw', value: rewritten };
   },
 };
 
