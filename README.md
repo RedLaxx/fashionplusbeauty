@@ -38,6 +38,10 @@ npm run images:force   # re-encode everything
 
 `public/images/generated/` is git-ignored: it is a build artifact that every build recreates. When sharp is unavailable the build logs a warning and falls back to the original images; on CI it fails instead, so a deployed build always includes the optimized set.
 
+### Images inside article body copy
+
+Write a body image in Markdown as usual — `![Descriptive alt text](/images/photo.jpg)` — preferably on its own line, on its own blank-line-separated paragraph. `scripts/satteri-article-images.mjs` upgrades it at build time to the same `<picture>` markup `ResponsivePicture.astro` renders: WebP `srcset` from 320px to 1600px, a column-aware `sizes`, and `width`/`height` straight from the source file. An image alone in its paragraph is wrapped in `<figure class="article-inline-figure">` (styled in `src/styles/global.css`); one used mid-sentence stays inline. Without a generated manifest the Markdown image is left exactly as authored, so `astro check` and clean clones keep working. New body images go in `public/images/`; restart the dev server after adding one so the plugin re-reads the manifest.
+
 ## Content editing with Pages CMS
 
 The site is static-first and stores articles as Markdown in `src/content/articles/`. The root `.pages.yml` is the Pages CMS configuration.
