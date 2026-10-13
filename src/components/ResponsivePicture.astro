@@ -4,7 +4,11 @@
  *
  * - Full-frame WebP variants (320w → 1600w) are offered to every viewport.
  * - `mobile` marks the image as a full-bleed media block on small screens, so
- *   phones get the 3:2 "compact" crops from `scripts/generate-images.mjs`.
+ *   phones get the 3:2 "compact" crops from `scripts/generate-images.mjs` and
+ *   keep the passed card frame `width`/`height` hint.
+ * - Non-`mobile` images (such as article covers) take `width`/`height` from the
+ *   manifest's real source pixels so the browser reserves the true aspect ratio
+ *   before load, falling back to the passed values when no manifest is present.
  * - Without a generated manifest the component degrades to a plain `<img>` with
  *   the original file, so `astro check` and clean clones keep working.
  *
@@ -46,6 +50,8 @@ const mainSrcset = entry ? srcSetFor(entry.main.variants) : undefined;
 const mobileSrcset =
   mobile && entry && entry.mobile.variants.length > 1 ? srcSetFor(entry.mobile.variants) : undefined;
 const fallbackSrc = entry ? fallbackSrcFor(entry) : src;
+const imgWidth = !mobileSrcset && entry ? entry.source.width : width;
+const imgHeight = !mobileSrcset && entry ? entry.source.height : height;
 ---
 <picture class:list={['responsive-picture', pictureClass]}>
   {mobileSrcset && entry && (
@@ -64,8 +70,8 @@ const fallbackSrc = entry ? fallbackSrcFor(entry) : src;
     srcset={mainSrcset}
     sizes={mainSrcset ? sizes : undefined}
     alt={alt}
-    width={width}
-    height={height}
+    width={imgWidth}
+    height={imgHeight}
     loading={loading}
     decoding={decoding}
     fetchpriority={fetchpriority}
