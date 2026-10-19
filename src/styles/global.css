@@ -2350,28 +2350,3 @@ h3 {
   object-fit: contain !important;
   object-position: center !important;
 }
-.article-cover {
-  display: flow-root;
-  margin-bottom: 0;
-}
-
-.article-cover figcaption {
-  display: block;
-  position: static;
-  margin: 0 0 20px;
-  padding: 10px 0 0;
-  line-height: 1.5;
-}
-
-.article-toolbar {
-  position: relative;
-  clear: both;
-  margin-top: 0;
-}
-
-@media (max-width: 540px) {
-  .article-cover figcaption {
-    margin-bottom: 16px;
-    padding-top: 6px;
-  }
-}
